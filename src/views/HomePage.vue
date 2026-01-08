@@ -15,8 +15,9 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { interviewApi } from '@/api'
+import { toast } from '@/components/ui/toast'
 import Sched from '../components/sched.vue'
-
 
 const router = useRouter()
 const roomnumber = ref('')
@@ -25,20 +26,27 @@ function test() {
   router.push('/interview')
 }
 
-function createroom() {
-  axios.post('http://localhost:8080/api/interview/createroom', 1)
-    .then(response => {
-      localStorage.setItem('reply', response.data)
-      roomnumber.value = response.data.data
+async function createroom() {
+  try {
+    const response = await interviewApi.createRoom(1)
+    // 保持与原来一致：response.data 是后端返回的完整对象 { code, data, message }
+    // response.data.data 是实际的房间号数据
+    localStorage.setItem('reply', JSON.stringify(response))
+    roomnumber.value = response?.data?.data || response?.data || ''
+    
+    if (roomnumber.value) {
       navigator.clipboard.writeText(roomnumber.value)
-      alert(`创建房间成功，房间号已经复制到粘贴板：${roomnumber.value}`)
+      toast({
+        title: '创建成功',
+        description: `房间号已复制到粘贴板：${roomnumber.value}`
+      })
       setTimeout(() => {
         router.push('/interview')
       }, 3000)
-    })
-    .catch(error => {
-      console.error('请求发送失败', error)
-    })
+    }
+  } catch (error) {
+    // 错误已在拦截器中统一处理
+  }
 }
 </script>
 

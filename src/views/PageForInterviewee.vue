@@ -21,7 +21,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
-import axios from 'axios'
+import { evaluationApi } from '@/api'
 
 // 使用 ref 创建一个响应式变量来存储输入的房间号
 const roomNumber = ref('')
@@ -57,19 +57,17 @@ const joinInterviewRoom = () => {
 
 // 获取面试结果的函数
 const fetchInterviewResults = async () => {
-  axios.defaults.baseURL = 'http://localhost:8080';
-
   try {
-    const response = await axios.get(`/evaluation/select/5/${intervieweeId.value}`, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    interviewResults.value = response.data.data.records
+    const response = await evaluationApi.selectByInterviewee('5', intervieweeId.value)
+    // 保持与原来一致：response.data 是后端返回的完整对象 { code, data, message }
+    // response.data.data.records 是实际的记录列表
+    interviewResults.value = response?.data?.data?.records || response?.data?.records || response?.records || []
 
-    console.log('Interview results:', interviewResults.value)
+    if (import.meta.env.DEV) {
+      console.log('Interview results:', interviewResults.value)
+    }
   } catch (error) {
-    console.error('Failed to fetch interview results:', error)
+    // 错误已在拦截器中统一处理
   }
 }
 

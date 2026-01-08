@@ -51,7 +51,7 @@ import {
 } from '@internationalized/date'
 import { Calendar } from '@/components/ui/calendar'
 import router from '@/router'
-import axios from 'axios'
+import { intervieweeApi } from '@/api'
 
 const df = new DateFormatter('zh-CN', {
   dateStyle: 'long',
@@ -103,24 +103,22 @@ const interviewees = ref([
 
 const fetchInterviewees = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/interviewee/showAll', {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    if (response.data.code === '0') {
-      interviewees.value = response.data.data.map((item: any) => ({
+    const response = await intervieweeApi.getAll()
+    // 保持与原来一致：response.data 是后端返回的完整对象 { code, data, message }
+    // response.data.data 是实际的面试者列表数据
+    if (response?.code === '0' || response?.data) {
+      const data = response.data?.data || response.data || response
+      const list = Array.isArray(data) ? data : (data?.records || [])
+      interviewees.value = list.map((item: any) => ({
         id: item.id,
         name: item.name,
         profile: item.profile,
         // 随机分配笔试分数,70-100之间
         score: Math.floor(Math.random() * 30 + 70)
       }))
-    } else {
-      console.error('Failed to fetch interviewees:', response.data.msg)
     }
   } catch (error) {
-    console.error('Failed to fetch interviewees:', error)
+    // 错误已在拦截器中统一处理
   }
 }
 

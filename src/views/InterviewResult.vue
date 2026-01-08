@@ -14,7 +14,7 @@ import { toast } from '@/components/ui/toast'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import * as z from 'zod'
-import axios from 'axios';
+import { evaluationApi } from '@/api'
 import { onMounted, ref } from 'vue'
 
 // 确保导入 Card 组件
@@ -125,20 +125,17 @@ const onSubmit = async (formValues: any) => {
       updatedAt: formatDateTime(new Date()) 
     };
 
-    console.log('准备发送请求:', requestBody);
+    if (import.meta.env.DEV) {
+      console.log('准备发送请求:', requestBody);
+    }
 
-    // 配置axios基础URL（如果需要）
-    axios.defaults.baseURL = 'http://localhost:8080';
+    const response = await evaluationApi.add(requestBody);
 
-    const response = await axios.post('/evaluation/add', requestBody, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    if (import.meta.env.DEV) {
+      console.log('服务器响应:', response);
+    }
 
-    console.log('服务器响应:', response);
-
-    if (response.data) {
+    if (response) {
       toast({
         title: '提交成功',
         description: '面试评价已保存'
@@ -151,10 +148,11 @@ const onSubmit = async (formValues: any) => {
       }
     }
   } catch (error) {
-    console.error('提交失败:', error);
+    // 错误已在拦截器中统一处理，这里可以添加额外的成功提示
     toast({
       title: '提交失败',
-      description: error.message || '保存失败，请重试'
+      description: error.message || '保存失败，请重试',
+      variant: 'destructive'
     });
   }
   

@@ -1,74 +1,55 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LoginPage from '../views/LoginPage.vue'
-import InterviewPage from '../views/InterviewPage.vue'
-import PageForInterviewee from '@/views/PageForInterviewee.vue'
-import PageForInterviewer from '@/views/PageForInterviewer.vue'
-import NewCreateInterviewPage from '@/views/NewCreateInterview.vue'
-import InterviewResultPage from '../views/InterviewResult.vue'
-import ScorePage from '../views/ScorePage.vue'
+import { routeConfig, RouteNames } from './routes.config'
 
-const routes = [
-  { 
-    path: '/', 
-    name: 'login',
-    component: LoginPage 
-  },
-  { 
-    path: '/interview', 
-    name: 'interview',
-    component: InterviewPage,
-    
-  },
-  { 
-    path: '/interviewee', 
-    name: 'interviewee',
-    component: PageForInterviewee,
-  },
-  { 
-    path: '/interviewer', 
-    name: 'interviewer',
-    component: PageForInterviewer,
-    
-  },
-  { 
-    path: '/create', 
-    name: 'create',
-    component: NewCreateInterviewPage,
-    
-  },
-  { 
-    path: '/result', 
-    name: 'result',
-    component: InterviewResultPage,
-    
-  },
-  { 
-    path: '/score', 
-    name: 'score',
-    component: ScorePage,
-    
-  }
-]
-
+/**
+ * 创建路由实例
+ */
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes: routeConfig
 })
 
-// Navigation guard
+/**
+ * 路由前置守卫
+ * 处理认证和权限验证
+ */
 router.beforeEach((to, from, next) => {
+  // 设置页面标题
+  if (to.meta?.title) {
+    document.title = `${to.meta.title} - 面试系统`
+  }
+
+  // 检查是否需要认证
+  const requiresAuth = to.meta?.requiresAuth
   const username = localStorage.getItem('username')
-  if (to.meta.requiresAuth && !username) {
-    next({ name: 'login' })
+
+  if (requiresAuth && !username) {
+    // 需要认证但未登录，重定向到登录页
+    next({ 
+      name: RouteNames.LOGIN,
+      query: { redirect: to.fullPath } // 保存原始路径，登录后可以跳转回来
+    })
   } else {
     next()
   }
 })
 
-// Error handling
+/**
+ * 路由后置守卫
+ * 可以用于页面访问统计等
+ */
+router.afterEach((to, from) => {
+  // 可以在这里添加页面访问日志等逻辑
+})
+
+/**
+ * 路由错误处理
+ */
 router.onError((error) => {
   console.error('Router error:', error)
-  router.push({ name: 'login' })
+  // 发生错误时重定向到登录页
+  router.push({ name: RouteNames.LOGIN })
 })
 
 export default router
+export { RouteNames }

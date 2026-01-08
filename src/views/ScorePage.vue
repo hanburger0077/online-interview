@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import Header from '@/components/header.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import axios from 'axios';
+import { evaluationApi } from '@/api'
 
 // 面试结果数据
 const interviewResult = ref({
@@ -26,40 +26,38 @@ const interviewResult = ref({
 
 // 获取面试结果的函数
 const fetchInterviewResult = async (interviewId: any) => {
-  axios.defaults.baseURL = 'http://localhost:8080';
-
   try {
-    const response = await axios.get(`/evaluation/search/5/${interviewId}`, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      const result = response.data.data.records
+    const response = await evaluationApi.search('5', interviewId)
+    // 保持与原来一致：response.data 是后端返回的完整对象 { code, data, message }
+    // response.data.data.records 是实际的记录列表
+    const result = response?.data?.data?.records || response?.data?.records || response?.records || []
+    
+    if (import.meta.env.DEV) {
       console.log('面试结果:', result[0])
-      if (Array.isArray(result) && result.length > 0) {
-        const interviewData = result[0];
-        interviewResult.value = {
-          jobTitle: interviewData.position,
-          interviewDate: interviewData.updatedAt,
-          scores: {
-            languageExpression: interviewData.languageExpression,
-            logicalThinking: interviewData.logicalThinking,
-            situationalResponse: interviewData.situationalResponse,
-            professionalKnowledge: interviewData.professionalKnowledge,
-            personalQuality: interviewData.personalQuality,
-            total: interviewData.comprehensiveScore
-          },
-          status: 'passed',
-          rank: 3,
-          comments: interviewData.comments,
-          hiringDecision: interviewData.result,
-          interviewee: interviewData.intervieweeId,
-        }
-      } else {
-        console.error('No interview data found');
+    }
+    
+    if (Array.isArray(result) && result.length > 0) {
+      const interviewData = result[0];
+      interviewResult.value = {
+        jobTitle: interviewData.position,
+        interviewDate: interviewData.updatedAt,
+        scores: {
+          languageExpression: interviewData.languageExpression,
+          logicalThinking: interviewData.logicalThinking,
+          situationalResponse: interviewData.situationalResponse,
+          professionalKnowledge: interviewData.professionalKnowledge,
+          personalQuality: interviewData.personalQuality,
+          total: interviewData.comprehensiveScore
+        },
+        status: 'passed',
+        rank: 3,
+        comments: interviewData.comments,
+        hiringDecision: interviewData.result,
+        interviewee: interviewData.intervieweeId,
       }
+    }
   } catch (error) {
-    console.error('Failed to fetch interview result:', error)
+    // 错误已在拦截器中统一处理
   }
 }
 

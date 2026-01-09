@@ -12,7 +12,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { CornerDownLeft, Paperclip, Mic } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
-import CameraIcon from '@/assets/camera.svg'
+
 
 const router = useRouter()
 const { toast } = useToast()
@@ -298,32 +298,39 @@ const sendAnswer = async (answer: string) => {
 </script>
 
 <template>
-<div class="min-h-screen bg-background">
+  <div class="min-h-screen bg-background flex flex-col relative overflow-hidden">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 z-0">
+      <div class="absolute top-20 left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute bottom-20 right-20 w-72 h-72 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl"></div>
+    </div>
+    
     <Header />
     
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex-1">
       <div class="mb-6">
-        <h1 class="text-3xl font-semibold tracking-tight">视频面试</h1>
-        <div class="flex items-center gap-4 mt-2">
-          <span class="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-medium">
+        <h1 class="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">视频面试</h1>
+        <div class="flex flex-wrap items-center gap-4 mt-2">
+          <Badge variant="outline" class="text-foreground neon-border">
             <span class="mr-2 h-2 w-2 rounded-full bg-green-500"></span>
             房间号：{{ usingroomnumber }}
-          </span>
-          <span class="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-medium">
+          </Badge>
+          <Badge variant="outline" class="text-foreground neon-border">
             <span class="mr-2 h-2 w-2 rounded-full bg-blue-500"></span>
             角色：{{ userRole }}
-          </span>
+          </Badge>
         </div>
       </div>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Video Panel -->
-        <div class="tech-gradient-teal rounded-xl border p-6">
+        <div class="glass-effect rounded-2xl border border-white/20 p-6 transition-all duration-300 hover:shadow-xl">
           <div class="mb-4">
-            <h2 class="text-xl font-semibold">视频通话</h2>
+            <h2 class="text-2xl font-semibold text-foreground">视频通话</h2>
           </div>
           
-          <div class="relative aspect-video bg-muted rounded-lg overflow-hidden mb-6 border border-border">
+          <div class="relative aspect-video bg-muted rounded-2xl overflow-hidden mb-6 border border-white/10">
             <div v-show="isCameraOn" 
                 class="absolute inset-0 flex flex-col items-center justify-center p-4">
               <video
@@ -332,9 +339,9 @@ const sendAnswer = async (answer: string) => {
                 autoplay 
                 muted 
                 playsinline 
-                class="w-full h-full object-cover rounded-lg transition-opacity duration-200"
+                class="w-full h-full object-cover rounded-2xl transition-opacity duration-200"
               />
-              <p v-show="isCameraOn && webrtcRole === 'sender'" class="absolute top-2 left-0 w-full text-center text-sm text-muted-foreground bg-black/20 py-1 rounded-t-lg">
+              <p v-show="isCameraOn && webrtcRole === 'sender'" class="absolute top-2 left-0 w-full text-center text-sm text-muted-foreground bg-black/20 py-1 rounded-t-2xl">
                 您正在分享摄像头画面
               </p>
               <video
@@ -343,15 +350,19 @@ const sendAnswer = async (answer: string) => {
                 autoplay 
                 muted 
                 playsinline 
-                class="w-full h-full object-cover rounded-lg transition-opacity duration-200"
+                class="w-full h-full object-cover rounded-2xl transition-opacity duration-200"
               />
-              <p v-show="isCameraOn && webrtcRole === 'receiver'" class="absolute top-2 left-0 w-full text-center text-sm text-muted-foreground bg-black/20 py-1 rounded-t-lg">
+              <p v-show="isCameraOn && webrtcRole === 'receiver'" class="absolute top-2 left-0 w-full text-center text-sm text-muted-foreground bg-black/20 py-1 rounded-t-2xl">
                 您正在接受对方的摄像头画面
               </p>
             </div>
             <div v-show="!isCameraOn" 
                 class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-              <img :src="CameraIcon" alt="Camera Off" class="h-24 w-24 opacity-60 mb-4" />
+              <svg class="h-24 w-24 opacity-60 mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 12L18 6H30L33 12H15Z"></path>
+                            <rect x="4" y="12" width="40" height="30" rx="3" stroke="currentColor" stroke-width="2" fill="none"></rect>
+                            <circle cx="24" cy="27" r="8" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                          </svg>
               <p class="text-sm text-muted-foreground">
                 摄像头未开启
               </p>
@@ -361,27 +372,34 @@ const sendAnswer = async (answer: string) => {
           <div class="flex gap-3">
             <Button 
               @click="startInterview"
-              class="flex-1 rounded-full py-5 text-base font-medium glow-effect"
+              class="flex-1 rounded-xl py-5 text-lg font-semibold neon-border transition-all duration-300 hover:shadow-primary/30 hover:shadow-xl active:scale-95 relative overflow-hidden group"
               :disabled="isCameraOn"
+              variant="default"
             >
-              <Mic class="mr-2 h-4 w-4" />
-              开始面试
+              <div class="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-10 transition-opacity"></div>
+              <span class="relative z-10 flex items-center justify-center gap-2">
+                <Mic class="mr-2 h-5 w-5" />
+                开始面试
+              </span>
             </Button>
             
             <Button 
               @click="stopInterview"
+              class="rounded-xl py-5 text-lg font-semibold neon-border transition-all duration-300 hover:shadow-destructive/30 hover:shadow-xl active:scale-95 relative overflow-hidden group"
               variant="destructive"
-              class="rounded-full py-5 text-base font-medium glow-effect"
             >
-              结束面试
+              <div class="absolute inset-0 bg-gradient-to-r from-destructive to-red-700 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+              <span class="relative z-10 flex items-center justify-center gap-2">
+                结束面试
+              </span>
             </Button>
           </div>
         </div>
 
         <!-- Chat Panel -->
-        <div class="tech-gradient-purple rounded-xl border flex flex-col">
-          <div class="p-6 border-b">
-            <h2 class="text-xl font-semibold">对话记录</h2>
+        <div class="glass-effect rounded-2xl border border-white/20 flex flex-col transition-all duration-300 hover:shadow-xl">
+          <div class="p-6 border-b border-white/10">
+            <h2 class="text-2xl font-semibold text-foreground">对话记录</h2>
           </div>
           
           <!-- 消息显示区域 -->
@@ -417,7 +435,7 @@ const sendAnswer = async (answer: string) => {
                 <div 
                   :class="{
                     'inline-block rounded-2xl px-4 py-2 bg-primary text-primary-foreground': message.sender === userRole,
-                    'inline-block rounded-2xl px-4 py-2 bg-muted': message.sender !== userRole && message.sender !== '系统消息',
+                    'inline-block rounded-2xl px-4 py-2 bg-white/10 text-foreground': message.sender !== userRole && message.sender !== '系统消息',
                     'inline-block rounded-2xl px-4 py-2 bg-secondary text-secondary-foreground text-center': message.sender === '系统消息'
                   }"
                 >
@@ -428,16 +446,19 @@ const sendAnswer = async (answer: string) => {
           </div>
           
           <!-- 消息输入区域 -->
-          <div class="p-4 border-t">
+          <div class="p-4 border-t border-white/10">
             <form @submit.prevent="handleSubmit" class="flex flex-col gap-3">
               <Textarea
                 v-model="newMessage"
                 placeholder="输入消息，友好交流..."
-                class="min-h-[100px] resize-none rounded-lg border bg-background"
+                class="min-h-[100px] resize-none rounded-xl border border-white/20 bg-white/5 text-foreground placeholder:text-muted-foreground focus:ring-primary focus:ring-2 transition-all"
              />
-              <Button type="submit" class="w-full rounded-full py-5 glow-effect">
-                发送消息
-                <CornerDownLeft class="ml-2 h-4 w-4" />
+              <Button type="submit" class="w-full rounded-xl py-5 text-lg font-semibold neon-border transition-all duration-300 hover:shadow-primary/30 hover:shadow-xl active:scale-95 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                <span class="relative z-10 flex items-center justify-center gap-2">
+                  发送消息
+                  <CornerDownLeft class="ml-2 h-5 w-5" />
+                </span>
               </Button> 
             </form>
           </div>

@@ -125,13 +125,13 @@ const onSubmit = async (formValues: any) => {
       updatedAt: formatDateTime(new Date()) 
     };
 
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV === 'development') {
       console.log('准备发送请求:', requestBody);
     }
 
     const response = await evaluationApi.add(requestBody);
 
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV === 'development') {
       console.log('服务器响应:', response);
     }
 
@@ -167,29 +167,40 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-background">
+  <div class="min-h-screen bg-background flex flex-col relative overflow-hidden">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 z-0">
+      <div class="absolute top-20 left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute bottom-20 right-20 w-72 h-72 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl"></div>
+    </div>
+    
     <Header />
     
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex-1">
       <div class="mb-8">
-        <h1 class="text-3xl font-semibold tracking-tight">面试评价表</h1>
-        <p class="text-muted-foreground mt-2">请对本次面试进行综合评价</p>
+        <h1 class="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">面试评价表</h1>
+        <p class="text-lg text-muted-foreground mt-2">请对本次面试进行综合评价</p>
       </div>
       
       <form @submit.prevent="submitForm" class="space-y-8">
-        <div class="bg-card rounded-xl border p-6">
+        <div class="glass-effect rounded-2xl border border-white/20 p-8 transition-all duration-300 hover:shadow-xl">
           <div class="mb-6">
-            <h2 class="text-xl font-semibold">面试信息</h2>
+            <h2 class="text-2xl font-semibold text-foreground">面试信息</h2>
           </div>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <!-- 面试场次消息 -->
             <FormField v-slot="{ field }" name="interviewId">
               <FormItem>
-                <FormLabel>面试场次</FormLabel>
+                <FormLabel class="text-foreground">面试场次</FormLabel>
                 <FormControl>
                   <!-- 面试结束后进入表单的时候，自动捕获面试的元数据 -->
-                  <Input v-model="interviewMetadata.interviewId" readonly />
+                  <Input 
+                    v-model="interviewMetadata.interviewId" 
+                    readonly 
+                    class="py-3 bg-white/5 border border-white/20 text-foreground placeholder:text-muted-foreground focus:ring-primary focus:ring-2 transition-all neon-border"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -197,9 +208,13 @@ onMounted(() => {
             
             <FormField v-slot="{ field }" name="interviewer">
               <FormItem>
-                <FormLabel>面试官</FormLabel>
+                <FormLabel class="text-foreground">面试官</FormLabel>
                 <FormControl>
-                  <Input v-model="interviewMetadata.interviewer" readonly />
+                  <Input 
+                    v-model="interviewMetadata.interviewer" 
+                    readonly 
+                    class="py-3 bg-white/5 border border-white/20 text-foreground placeholder:text-muted-foreground focus:ring-primary focus:ring-2 transition-all neon-border"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -211,9 +226,13 @@ onMounted(() => {
             <!-- 面试者信息 -->
             <FormField v-slot="{ field }" name="intervieweeId">
               <FormItem>
-                <FormLabel>面试者ID</FormLabel>
+                <FormLabel class="text-foreground">面试者ID</FormLabel>
                 <FormControl>
-                  <Input v-bind="field" placeholder="请输入面试者ID" />
+                  <Input 
+                    v-bind="field" 
+                    placeholder="请输入面试者ID" 
+                    class="py-3 bg-white/5 border border-white/20 text-foreground placeholder:text-muted-foreground focus:ring-primary focus:ring-2 transition-all neon-border"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -222,9 +241,13 @@ onMounted(() => {
             <!-- 面试岗位 -->
             <FormField v-slot="{ field }" name="position">
               <FormItem>
-                <FormLabel>应聘岗位</FormLabel>
+                <FormLabel class="text-foreground">应聘岗位</FormLabel>
                 <FormControl>
-                  <Input v-bind="field" placeholder="请输入应聘岗位" />
+                  <Input 
+                    v-bind="field" 
+                    placeholder="请输入应聘岗位" 
+                    class="py-3 bg-white/5 border border-white/20 text-foreground placeholder:text-muted-foreground focus:ring-primary focus:ring-2 transition-all neon-border"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -233,21 +256,21 @@ onMounted(() => {
           
           <!-- 评分维度 -->
           <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-6">评分维度</h2>
+            <h2 class="text-2xl font-semibold mb-6 text-foreground">评分维度</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField v-slot="{ field }" name="languageExpression">
                 <FormItem>
                   <div class="flex items-center justify-between">
-                    <FormLabel>语言表达（20分）</FormLabel>
+                    <FormLabel class="text-foreground">语言表达（20分）</FormLabel>
                     <Input 
                       type="number" 
                       v-bind="field" 
                       min="0" 
                       max="20" 
-                      class="w-20 text-right" 
+                      class="w-20 text-right py-2 bg-white/5 border border-white/20 text-foreground focus:ring-primary focus:ring-2 transition-all neon-border" 
                     />
                   </div>
-                  <FormDescription>评估表达的准确性、流畅性和感染力</FormDescription>
+                  <FormDescription class="text-muted-foreground">评估表达的准确性、流畅性和感染力</FormDescription>
                   <FormMessage />
                 </FormItem>
               </FormField>
@@ -255,16 +278,16 @@ onMounted(() => {
               <FormField v-slot="{ field }" name="logicalThinking">
                 <FormItem>
                   <div class="flex items-center justify-between">
-                    <FormLabel>逻辑思维（20分）</FormLabel>
+                    <FormLabel class="text-foreground">逻辑思维（20分）</FormLabel>
                     <Input 
                       type="number" 
                       v-bind="field" 
                       min="0" 
                       max="20" 
-                      class="w-20 text-right" 
+                      class="w-20 text-right py-2 bg-white/5 border border-white/20 text-foreground focus:ring-primary focus:ring-2 transition-all neon-border" 
                     />
                   </div>
-                  <FormDescription>评估分析问题和解决问题的能力</FormDescription>
+                  <FormDescription class="text-muted-foreground">评估分析问题和解决问题的能力</FormDescription>
                   <FormMessage />
                 </FormItem>
               </FormField>
@@ -272,16 +295,16 @@ onMounted(() => {
               <FormField v-slot="{ field }" name="situationalResponse">
                 <FormItem>
                   <div class="flex items-center justify-between">
-                    <FormLabel>情景应变（20分）</FormLabel>
+                    <FormLabel class="text-foreground">情景应变（20分）</FormLabel>
                     <Input 
                       type="number" 
                       v-bind="field" 
                       min="0" 
                       max="20" 
-                      class="w-20 text-right" 
+                      class="w-20 text-right py-2 bg-white/5 border border-white/20 text-foreground focus:ring-primary focus:ring-2 transition-all neon-border" 
                     />
                   </div>
-                  <FormDescription>评估处理突发情况的应变能力</FormDescription>
+                  <FormDescription class="text-muted-foreground">评估处理突发情况的应变能力</FormDescription>
                   <FormMessage />
                 </FormItem>
               </FormField>
@@ -289,16 +312,16 @@ onMounted(() => {
               <FormField v-slot="{ field }" name="professionalKnowledge">
                 <FormItem>
                   <div class="flex items-center justify-between">
-                    <FormLabel>专业知识（20分）</FormLabel>
+                    <FormLabel class="text-foreground">专业知识（20分）</FormLabel>
                     <Input 
                       type="number" 
                       v-bind="field" 
                       min="0" 
                       max="20" 
-                      class="w-20 text-right" 
+                      class="w-20 text-right py-2 bg-white/5 border border-white/20 text-foreground focus:ring-primary focus:ring-2 transition-all neon-border" 
                     />
                   </div>
-                  <FormDescription>评估岗位相关的专业知识储备</FormDescription>
+                  <FormDescription class="text-muted-foreground">评估岗位相关的专业知识储备</FormDescription>
                   <FormMessage />
                 </FormItem>
               </FormField>
@@ -306,16 +329,16 @@ onMounted(() => {
               <FormField v-slot="{ field }" name="personalQuality">
                 <FormItem>
                   <div class="flex items-center justify-between">
-                    <FormLabel>个人素质（20分）</FormLabel>
+                    <FormLabel class="text-foreground">个人素质（20分）</FormLabel>
                     <Input 
                       type="number" 
                       v-bind="field" 
                       min="0" 
                       max="20" 
-                      class="w-20 text-right" 
+                      class="w-20 text-right py-2 bg-white/5 border border-white/20 text-foreground focus:ring-primary focus:ring-2 transition-all neon-border" 
                     />
                   </div>
-                  <FormDescription>评估思想品德、心理素质等综合素养</FormDescription>
+                  <FormDescription class="text-muted-foreground">评估思想品德、心理素质等综合素养</FormDescription>
                   <FormMessage />
                 </FormItem>
               </FormField>
@@ -323,16 +346,16 @@ onMounted(() => {
               <FormField v-slot="{ field }" name="comprehensiveScore">
                 <FormItem>
                   <div class="flex items-center justify-between">
-                    <FormLabel>综合得分</FormLabel>
+                    <FormLabel class="text-foreground">综合得分</FormLabel>
                     <Input 
                       type="number" 
                       v-bind="field" 
                       min="0" 
                       max="100" 
-                      class="w-20 text-right" 
+                      class="w-20 text-right py-2 bg-white/5 border border-white/20 text-foreground focus:ring-primary focus:ring-2 transition-all neon-border" 
                     />
                   </div>
-                  <FormDescription>面试总分（满分100分）</FormDescription>
+                  <FormDescription class="text-muted-foreground">面试总分（满分100分）</FormDescription>
                   <FormMessage />
                 </FormItem>
               </FormField>
@@ -341,14 +364,14 @@ onMounted(() => {
 
           <!-- 评语和建议 -->
           <div class="mb-6">
-            <h2 class="text-xl font-semibold mb-4">详细评语</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-foreground">详细评语</h2>
             <FormField v-slot="{ field }" name="comments">
               <FormItem>
                 <FormControl>
                   <Textarea 
                     v-bind="field" 
                     placeholder="请详细描述面试者的表现..."
-                    class="min-h-[150px]"
+                    class="min-h-[150px] bg-white/5 border border-white/20 text-foreground placeholder:text-muted-foreground focus:ring-primary focus:ring-2 transition-all neon-border"
                   />
                 </FormControl>
                 <FormMessage />
@@ -358,8 +381,18 @@ onMounted(() => {
         </div>
         
         <div class="flex justify-end">
-          <Button type="submit" class="px-8 py-5 rounded-full text-base font-medium">
-            提交评价
+          <Button 
+            type="submit" 
+            class="px-8 py-5 rounded-xl text-lg font-semibold neon-border transition-all duration-300 hover:shadow-primary/30 hover:shadow-xl active:scale-95 relative overflow-hidden group"
+            variant="default"
+          >
+            <div class="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-10 transition-opacity"></div>
+            <span class="relative z-10 flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              提交评价
+            </span>
           </Button>
         </div>
       </form>

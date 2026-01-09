@@ -32,7 +32,7 @@ const fetchInterviewResult = async (interviewId: any) => {
     // response.data.data.records 是实际的记录列表
     const result = response?.data?.data?.records || response?.data?.records || response?.records || []
     
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV === 'development') {
       console.log('面试结果:', result[0])
     }
     
@@ -83,18 +83,25 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-background">
+  <div class="min-h-screen bg-background flex flex-col relative overflow-hidden">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 z-0">
+      <div class="absolute top-20 left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute bottom-20 right-20 w-72 h-72 bg-accent/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl"></div>
+    </div>
+    
     <Header />
     
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex-1">
       <div class="mb-8">
-        <h1 class="text-3xl font-semibold tracking-tight">面试结果</h1>
-        <p class="text-muted-foreground mt-2">查看详细的面试评估结果</p>
+        <h1 class="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">面试结果</h1>
+        <p class="text-lg text-muted-foreground mt-2">查看详细的面试评估结果</p>
       </div>
       
-      <div class="bg-card rounded-xl border p-6 mb-8">
+      <div class="glass-effect rounded-2xl border border-white/20 p-8 mb-8 transition-all duration-300 hover:shadow-xl">
         <div class="mb-6">
-          <h2 class="text-xl font-semibold">{{ interviewResult.jobTitle }}</h2>
+          <h2 class="text-2xl font-semibold text-foreground">{{ interviewResult.jobTitle }}</h2>
           <div class="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
             <span>面试日期：{{ interviewResult.interviewDate }}</span>
             <span>面试者：{{ interviewResult.interviewee }}</span>
@@ -103,20 +110,20 @@ onMounted(() => {
         
         <!-- 状态展示 -->
         <div class="flex flex-wrap gap-3 mb-8">
-          <Badge :variant="interviewResult.status === 'passed' ? 'default' : 'destructive'" class="rounded-full">
+          <Badge :variant="interviewResult.status === 'passed' ? 'default' : 'destructive'" class="rounded-xl neon-border">
             {{ interviewResult.status === 'passed' ? '面试通过' : '未通过' }}
           </Badge>
-          <Badge variant="outline" class="rounded-full">
+          <Badge variant="outline" class="rounded-xl neon-border">
             排名: {{ interviewResult.rank }}
           </Badge>
-          <Badge :variant="interviewResult.hiringDecision === 'accepted' ? 'default' : 'destructive'" class="rounded-full">
+          <Badge :variant="interviewResult.hiringDecision === 'accepted' ? 'default' : 'destructive'" class="rounded-xl neon-border">
             {{ interviewResult.hiringDecision === 'accepted' ? '录用' : '未录用' }}
           </Badge>
         </div>
         
         <!-- 总分圆环图 -->
         <div class="flex justify-center mb-10">
-          <div class="relative w-48 h-48">
+          <div class="relative w-56 h-56">
             <svg class="w-full h-full" viewBox="0 0 100 100">
               <!-- 背景圆环 -->
               <circle 
@@ -142,7 +149,7 @@ onMounted(() => {
               />
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span class="text-3xl font-bold">{{ interviewResult.scores.total }}</span>
+              <span class="text-4xl font-bold text-foreground">{{ interviewResult.scores.total }}</span>
               <span class="text-sm text-muted-foreground">总分</span>
             </div>
           </div>
@@ -150,38 +157,38 @@ onMounted(() => {
         
         <!-- 分数详情 -->
         <div class="mb-8">
-          <h3 class="text-xl font-semibold mb-6">详细得分</h3>
+          <h3 class="text-2xl font-semibold mb-6 text-foreground">详细得分</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="flex items-center justify-between p-4 rounded-lg border">
-              <span>语言表达</span>
-              <span class="font-medium">{{ interviewResult.scores.languageExpression }}/20</span>
+            <div class="flex items-center justify-between p-5 rounded-2xl border border-white/10 glass-effect">
+              <span class="text-foreground">语言表达</span>
+              <span class="font-medium text-foreground">{{ interviewResult.scores.languageExpression }}/20</span>
             </div>
-            <div class="flex items-center justify-between p-4 rounded-lg border">
-              <span>逻辑思维</span>
-              <span class="font-medium">{{ interviewResult.scores.logicalThinking }}/20</span>
+            <div class="flex items-center justify-between p-5 rounded-2xl border border-white/10 glass-effect">
+              <span class="text-foreground">逻辑思维</span>
+              <span class="font-medium text-foreground">{{ interviewResult.scores.logicalThinking }}/20</span>
             </div>
-            <div class="flex items-center justify-between p-4 rounded-lg border">
-              <span>情景应变</span>
-              <span class="font-medium">{{ interviewResult.scores.situationalResponse }}/20</span>
+            <div class="flex items-center justify-between p-5 rounded-2xl border border-white/10 glass-effect">
+              <span class="text-foreground">情景应变</span>
+              <span class="font-medium text-foreground">{{ interviewResult.scores.situationalResponse }}/20</span>
             </div>
-            <div class="flex items-center justify-between p-4 rounded-lg border">
-              <span>专业知识</span>
-              <span class="font-medium">{{ interviewResult.scores.professionalKnowledge }}/20</span>
+            <div class="flex items-center justify-between p-5 rounded-2xl border border-white/10 glass-effect">
+              <span class="text-foreground">专业知识</span>
+              <span class="font-medium text-foreground">{{ interviewResult.scores.professionalKnowledge }}/20</span>
             </div>
-            <div class="flex items-center justify-between p-4 rounded-lg border">
-              <span>个人素质</span>
-              <span class="font-medium">{{ interviewResult.scores.personalQuality }}/20</span>
+            <div class="flex items-center justify-between p-5 rounded-2xl border border-white/10 glass-effect">
+              <span class="text-foreground">个人素质</span>
+              <span class="font-medium text-foreground">{{ interviewResult.scores.personalQuality }}/20</span>
             </div>
-            <div class="flex items-center justify-between p-4 rounded-lg bg-primary text-primary-foreground">
-              <span class="font-medium">总分</span>
-              <span class="font-bold">{{ interviewResult.scores.total }}/100</span>
+            <div class="flex items-center justify-between p-5 rounded-2xl bg-primary text-primary-foreground">
+              <span class="font-medium text-primary-foreground">总分</span>
+              <span class="font-bold text-primary-foreground">{{ interviewResult.scores.total }}/100</span>
             </div>
           </div>
         </div>
         
         <!-- 评语 -->
-        <div class="bg-muted/30 rounded-xl p-6">
-          <h3 class="text-xl font-semibold mb-4">面试评语</h3>
+        <div class="glass-effect rounded-2xl p-8 border border-white/10">
+          <h3 class="text-2xl font-semibold mb-4 text-foreground">面试评语</h3>
           <p class="text-foreground leading-relaxed">{{ interviewResult.comments }}</p>
         </div>
       </div>

@@ -1,14 +1,37 @@
 <template>
-  <div class="app-container">
-    <div id="shouye">
-      <h1>欢迎使用面试系统</h1>
-      <Sched />
-      <Header></Header>
-      <div class="buttons">
-        <el-button type="primary" @click="createroom">创建房间</el-button>
-        <el-button type="primary" @click="test">加入面试</el-button>
+  <div class="min-h-screen w-full bg-background flex flex-col">
+    <Header />
+    <main class="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div class="max-w-md w-full space-y-8 animate-in">
+        <div class="text-center">
+          <h1 class="mb-6 font-semibold">在线面试系统</h1>
+          <p class="text-lg text-muted-foreground mb-10">
+            体验简洁高效的远程面试解决方案
+          </p>
+        </div>
+        
+        <Sched />
+        
+        <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <button 
+            @click="createroom"
+            class="px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium transition-all duration-300 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          >
+            创建面试房间
+          </button>
+          <button 
+            @click="test"
+            class="px-6 py-3 bg-secondary text-secondary-foreground rounded-full font-medium transition-all duration-300 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          >
+            加入面试
+          </button>
+        </div>
       </div>
-    </div>
+    </main>
+    
+    <footer class="py-6 text-center text-sm text-muted-foreground">
+      <p>© {{ new Date().getFullYear() }} 在线面试系统. 保留所有权利.</p>
+    </footer>
   </div>
 </template>
 

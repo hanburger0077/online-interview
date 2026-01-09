@@ -167,147 +167,202 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex w-full min-h-screen bg-gray-50">
-    <form @submit.prevent="submitForm" class="w-full max-w-3xl mx-auto my-4">
-    <Card class="p-6">
-      <CardHeader class="space-y-1 pb-4">
-        <CardTitle>面试评价表</CardTitle>
-        <CardDescription>请对本次面试进行综合评价</CardDescription>
-      </CardHeader>
+  <div class="min-h-screen bg-background">
+    <Header />
+    
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="mb-8">
+        <h1 class="text-3xl font-semibold tracking-tight">面试评价表</h1>
+        <p class="text-muted-foreground mt-2">请对本次面试进行综合评价</p>
+      </div>
+      
+      <form @submit.prevent="submitForm" class="space-y-8">
+        <div class="bg-card rounded-xl border p-6">
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold">面试信息</h2>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- 面试场次消息 -->
+            <FormField v-slot="{ field }" name="interviewId">
+              <FormItem>
+                <FormLabel>面试场次</FormLabel>
+                <FormControl>
+                  <!-- 面试结束后进入表单的时候，自动捕获面试的元数据 -->
+                  <Input v-model="interviewMetadata.interviewId" readonly />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+            
+            <FormField v-slot="{ field }" name="interviewer">
+              <FormItem>
+                <FormLabel>面试官</FormLabel>
+                <FormControl>
+                  <Input v-model="interviewMetadata.interviewer" readonly />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
+          
+          <!-- 面试者信息和岗位 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- 面试者信息 -->
+            <FormField v-slot="{ field }" name="intervieweeId">
+              <FormItem>
+                <FormLabel>面试者ID</FormLabel>
+                <FormControl>
+                  <Input v-bind="field" placeholder="请输入面试者ID" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+            
+            <!-- 面试岗位 -->
+            <FormField v-slot="{ field }" name="position">
+              <FormItem>
+                <FormLabel>应聘岗位</FormLabel>
+                <FormControl>
+                  <Input v-bind="field" placeholder="请输入应聘岗位" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
+          
+          <!-- 评分维度 -->
+          <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-6">评分维度</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField v-slot="{ field }" name="languageExpression">
+                <FormItem>
+                  <div class="flex items-center justify-between">
+                    <FormLabel>语言表达（20分）</FormLabel>
+                    <Input 
+                      type="number" 
+                      v-bind="field" 
+                      min="0" 
+                      max="20" 
+                      class="w-20 text-right" 
+                    />
+                  </div>
+                  <FormDescription>评估表达的准确性、流畅性和感染力</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
 
-      <CardContent class="space-y-6">
-        <!-- 面试场次消息 -->
-        <FormField v-slot="{ field }" name="interviewId">
-          <FormItem>
-            <FormLabel>面试场次：</FormLabel>
-            <FormControl>
-              <!-- 面试结束后进入表单的时候，自动捕获面试的元数据 -->
-              <input  v-model="interviewMetadata.interviewId" readonly />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField v-slot="{ field }" name="interviewer">
-          <FormItem>
-            <FormLabel>面试官：</FormLabel>
-            <FormControl>
-              <input  v-model="interviewMetadata.interviewer" readonly />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <!-- 面试者信息 -->
-        <FormField v-slot="{ field }" name="intervieweeId">
-          <FormItem>
-            <FormLabel>面试者ID</FormLabel>
-            <FormControl>
-              <Input v-bind="field" placeholder="请输入面试者ID" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <!-- 面试岗位 -->
-        <FormField v-slot="{ field }" name="position">
-          <FormItem>
-            <FormLabel>应聘岗位</FormLabel>
-            <FormControl>
-              <Input v-bind="field" placeholder="请输入应聘岗位" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+              <FormField v-slot="{ field }" name="logicalThinking">
+                <FormItem>
+                  <div class="flex items-center justify-between">
+                    <FormLabel>逻辑思维（20分）</FormLabel>
+                    <Input 
+                      type="number" 
+                      v-bind="field" 
+                      min="0" 
+                      max="20" 
+                      class="w-20 text-right" 
+                    />
+                  </div>
+                  <FormDescription>评估分析问题和解决问题的能力</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
 
-        <!-- 评分维度 -->
-        <div class="grid grid-cols-2 gap-6">
-          <FormField v-slot="{ field }" name="languageExpression">
-            <FormItem>
-              <FormLabel>语言表达（20分）</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="field" min="0" max="20" />
-              </FormControl>
-              <FormDescription>评估表达的准确性、流畅性和感染力</FormDescription>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+              <FormField v-slot="{ field }" name="situationalResponse">
+                <FormItem>
+                  <div class="flex items-center justify-between">
+                    <FormLabel>情景应变（20分）</FormLabel>
+                    <Input 
+                      type="number" 
+                      v-bind="field" 
+                      min="0" 
+                      max="20" 
+                      class="w-20 text-right" 
+                    />
+                  </div>
+                  <FormDescription>评估处理突发情况的应变能力</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
 
-          <FormField v-slot="{ field }" name="logicalThinking">
-            <FormItem>
-              <FormLabel>逻辑思维（20分）</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="field" min="0" max="20" />
-              </FormControl>
-              <FormDescription>评估分析问题和解决问题的能力</FormDescription>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+              <FormField v-slot="{ field }" name="professionalKnowledge">
+                <FormItem>
+                  <div class="flex items-center justify-between">
+                    <FormLabel>专业知识（20分）</FormLabel>
+                    <Input 
+                      type="number" 
+                      v-bind="field" 
+                      min="0" 
+                      max="20" 
+                      class="w-20 text-right" 
+                    />
+                  </div>
+                  <FormDescription>评估岗位相关的专业知识储备</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
 
-          <FormField v-slot="{ field }" name="situationalResponse">
-            <FormItem>
-              <FormLabel>情景应变（20分）</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="field" min="0" max="20" />
-              </FormControl>
-              <FormDescription>评估处理突发情况的应变能力</FormDescription>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+              <FormField v-slot="{ field }" name="personalQuality">
+                <FormItem>
+                  <div class="flex items-center justify-between">
+                    <FormLabel>个人素质（20分）</FormLabel>
+                    <Input 
+                      type="number" 
+                      v-bind="field" 
+                      min="0" 
+                      max="20" 
+                      class="w-20 text-right" 
+                    />
+                  </div>
+                  <FormDescription>评估思想品德、心理素质等综合素养</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
 
-          <FormField v-slot="{ field }" name="professionalKnowledge">
-            <FormItem>
-              <FormLabel>专业知识（20分）</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="field" min="0" max="20" />
-              </FormControl>
-              <FormDescription>评估岗位相关的专业知识储备</FormDescription>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+              <FormField v-slot="{ field }" name="comprehensiveScore">
+                <FormItem>
+                  <div class="flex items-center justify-between">
+                    <FormLabel>综合得分</FormLabel>
+                    <Input 
+                      type="number" 
+                      v-bind="field" 
+                      min="0" 
+                      max="100" 
+                      class="w-20 text-right" 
+                    />
+                  </div>
+                  <FormDescription>面试总分（满分100分）</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+            </div>
+          </div>
 
-          <FormField v-slot="{ field }" name="personalQuality">
-            <FormItem>
-              <FormLabel>个人素质（20分）</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="field" min="0" max="20" />
-              </FormControl>
-              <FormDescription>评估思想品德、心理素质等综合素养</FormDescription>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <FormField v-slot="{ field }" name="comprehensiveScore">
-            <FormItem>
-              <FormLabel>综合得分</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="field" min="0" max="100" />
-              </FormControl>
-              <FormDescription>面试总分（满分100分）</FormDescription>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+          <!-- 评语和建议 -->
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-4">详细评语</h2>
+            <FormField v-slot="{ field }" name="comments">
+              <FormItem>
+                <FormControl>
+                  <Textarea 
+                    v-bind="field" 
+                    placeholder="请详细描述面试者的表现..."
+                    class="min-h-[150px]"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
         </div>
-
-        <!-- 评语和建议 -->
-        <FormField v-slot="{ field }" name="comments">
-          <FormItem>
-            <FormLabel>详细评语</FormLabel>
-            <FormControl>
-              <Textarea 
-                v-bind="field" 
-                placeholder="请详细描述面试者的表现..."
-                class="w-full"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </CardContent>
-
-      <CardFooter>
-        <Button type="submit" class="w-full">
-          提交评价
-        </Button>
-      </CardFooter>
-    </Card>
-  </form>
+        
+        <div class="flex justify-end">
+          <Button type="submit" class="px-8 py-5 rounded-full text-base font-medium">
+            提交评价
+          </Button>
+        </div>
+      </form>
+    </main>
   </div>
 </template>

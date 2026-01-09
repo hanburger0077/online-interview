@@ -45,63 +45,77 @@ const onSubmit = form.handleSubmit((values) => {
 </script>
 
 <template>
-<div class="flex justify-center items-center min-h-screen">
-  <Card class="w-[400px] h-[550px] p-4">
-    <CardHeader class="space-y-2">
-      <CardTitle class="text-2xl font-bold text-center scale-125">
-        登录面试子系统
-      </CardTitle>
-      <CardDescription class="text-center text-base">
-        输入您的账号和密码
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <form @submit.prevent="onSubmit" class="space-y-6">
-        <FormField v-slot="{ field }" name="email">
-          <FormItem>
-            <FormLabel class="font-bold scale-150">账号</FormLabel>
-            <FormControl>
-              <Input v-bind="field" placeholder="请输入凭证号" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+  <div class="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-background to-muted px-4 py-12 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <div class="text-center">
+        <h1 class="text-3xl font-semibold tracking-tight mb-2">面试系统</h1>
+        <p class="text-muted-foreground">输入您的信息以继续</p>
+      </div>
+      
+      <div class="bg-card rounded-2xl shadow-sm border p-8">
+        <form @submit.prevent="onSubmit" class="space-y-6">
+          <FormField v-slot="{ field }" name="email">
+            <FormItem>
+              <FormLabel class="font-medium">邮箱/用户名</FormLabel>
+              <FormControl>
+                <Input v-bind="field" placeholder="请输入您的邮箱或用户名" class="py-5" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-        <FormField v-slot="{ field }" name="password">
-          <FormItem>
-            <FormLabel class="font-bold scale-150">密码</FormLabel>
-            <FormControl>
-              <Input type="password" v-bind="field" placeholder="请输入密码" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+          <FormField v-slot="{ field }" name="password">
+            <FormItem>
+              <FormLabel class="font-medium">密码</FormLabel>
+              <FormControl>
+                <Input type="password" v-bind="field" placeholder="请输入密码" class="py-5" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-        <FormField v-slot="{ field }" name="accountType">
-          <FormItem class="space-y-3 ">
-            <FormLabel class="font-bold scale-150">选择身份</FormLabel>
-            <FormControl>
-              <RadioGroup v-bind="field" class="flex flex-col space-y-3">
-                <FormItem class="flex items-center space-x-3">
-                  <RadioGroupItem value="interviewer" />
-                  <FormLabel class="font-normal">我是面试官</FormLabel>
-                </FormItem>
-                <FormItem class="flex items-center space-x-3">
-                  <RadioGroupItem value="interviewee" />
-                  <FormLabel class="font-normal">我是面试者</FormLabel>
-                </FormItem>
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </form>
-    </CardContent>
-    <CardFooter class="pt-6">
-      <Button type="submit" class="w-full h-11" @click="onSubmit">
-        登录
-      </Button>
-    </CardFooter>
-  </Card>
-</div>
+          <FormField v-slot="{ field }" name="accountType">
+            <FormItem class="space-y-3">
+              <FormLabel class="font-medium">选择身份</FormLabel>
+              <FormControl>
+                <RadioGroup v-bind="field" class="grid grid-cols-2 gap-4">
+                  <div class="relative">
+                    <RadioGroupItem value="interviewer" id="interviewer" class="peer sr-only" />
+                    <Label 
+                      htmlFor="interviewer" 
+                      class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5"
+                    >
+                      <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                      </svg>
+                      <span>面试官</span>
+                    </Label>
+                  </div>
+                  <div class="relative">
+                    <RadioGroupItem value="interviewee" id="interviewee" class="peer sr-only" />
+                    <Label 
+                      htmlFor="interviewee" 
+                      class="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5"
+                    >
+                      <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                      </svg>
+                      <span>面试者</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </form>
+      </div>
+      
+      <div class="text-center pt-4">
+        <Button type="submit" @click="onSubmit" class="w-full max-w-xs py-6 text-base rounded-full" size="lg">
+          登录
+        </Button>
+      </div>
+    </div>
+  </div>
 </template>

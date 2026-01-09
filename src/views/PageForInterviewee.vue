@@ -78,52 +78,121 @@ const viewInterviewDetail = (interviewId) => {
 </script>
 
 <template>
-<div class="h-screen w-full flex items-center justify-center">
-  <Card class="w-[400px] h-[200px] space-y-1 scale-125">
-    <CardHeader>
-      <CardTitle class="text-center">你好！面试者 {{intervieweeId}}</CardTitle>
-      <!-- <CardDescription>请选择</CardDescription> -->
-    </CardHeader>
-    <form @submit.prevent="joinInterviewRoom">
-    <CardContent>
-      <div>
-        <Input v-model="roomNumber" id="name" placeholder="请输入面试官提供的房间号" />
+  <div class="min-h-screen bg-background">
+    <Header />
+    
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="mb-8 text-center">
+        <h1 class="text-3xl font-semibold tracking-tight">面试者中心</h1>
+        <p class="text-muted-foreground mt-2">欢迎，面试者 {{intervieweeId}}</p>
       </div>
-    </CardContent>
-    <CardFooter class="flex flex-row items-center justify-between">
-      <Button type="submit" class="w-full mr-2">加入面试房间</Button>
-      <Sheet>
-        <SheetTrigger as-child>
-          <Button variant="secondary">
-            查看历史面试结果
-          </Button>
-        </SheetTrigger>
-        <SheetContent class = "w-[400px]">
-          <SheetHeader>
-            <SheetTitle>历史面试</SheetTitle>
-            <SheetDescription>
-              您可以在这里查看已经公布的面试结果
-            </SheetDescription>
-          </SheetHeader>
-          <div class="grid gap-4 py-4">
-            <div v-for="result in interviewResults" :key="result.interviewId" class="grid grid-cols-4 items-center gap-4">
-              <div class="col-span-1">{{ result.interviewId }}</div>
-              <div class="col-span-1">{{ result.position }}</div>
-              <div class="col-span-1">{{ result.updatedAt }}</div>
-              <div class="col-span-1">{{ result.result }}</div>
-              <div class="col-span-1">
-                <Button @click="viewInterviewDetail(result.interviewId)">查看详情</Button>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- 加入面试卡片 -->
+        <div class="bg-card rounded-xl border p-6">
+          <h2 class="text-xl font-semibold mb-6">加入面试</h2>
+          
+          <form @submit.prevent="joinInterviewRoom" class="space-y-6">
+            <div>
+              <label for="roomNumber" class="block text-sm font-medium mb-2">房间号</label>
+              <Input 
+                v-model="roomNumber" 
+                id="roomNumber" 
+                placeholder="请输入面试官提供的房间号" 
+                class="py-5"
+              />
+            </div>
+            
+            <Button type="submit" class="w-full py-5 rounded-full text-base font-medium">
+              加入面试房间
+            </Button>
+          </form>
+        </div>
+        
+        <!-- 历史面试结果 -->
+        <div class="bg-card rounded-xl border p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold">历史面试</h2>
+            <Sheet>
+              <SheetTrigger as-child>
+                <Button variant="outline" class="rounded-full">
+                  查看全部
+                </Button>
+              </SheetTrigger>
+              <SheetContent class="sm:max-w-md">
+                <SheetHeader>
+                  <SheetTitle>历史面试结果</SheetTitle>
+                  <SheetDescription>
+                    您可以在这里查看已经公布的面试结果
+                  </SheetDescription>
+                </SheetHeader>
+                <div class="py-4">
+                  <div 
+                    v-for="result in interviewResults" 
+                    :key="result.interviewId" 
+                    class="flex items-center justify-between py-3 border-b last:border-0"
+                  >
+                    <div class="flex-1">
+                      <div class="font-medium">{{ result.position }}</div>
+                      <div class="text-sm text-muted-foreground">{{ result.interviewId }}</div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <span class="text-sm font-medium">{{ result.comprehensiveScore || result.result }}</span>
+                      <Button 
+                        @click="viewInterviewDetail(result.interviewId)"
+                        size="sm"
+                        class="h-8"
+                      >
+                        查看
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div v-if="interviewResults.length === 0" class="text-center py-8 text-muted-foreground">
+                    暂无面试记录
+                  </div>
+                </div>
+                <SheetFooter>
+                  <SheetClose as-child>
+                    <Button type="button" variant="outline" class="rounded-full">
+                      关闭
+                    </Button>
+                  </SheetClose>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
+          </div>
+          
+          <div class="space-y-4">
+            <div 
+              v-for="(result, index) in interviewResults.slice(0, 3)" 
+              :key="result.interviewId" 
+              v-show="index < 3"
+              class="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors"
+            >
+              <div>
+                <div class="font-medium">{{ result.position }}</div>
+                <div class="text-sm text-muted-foreground">{{ result.interviewId }}</div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-sm font-medium">{{ result.comprehensiveScore || result.result }}</span>
+                <Button 
+                  @click="viewInterviewDetail(result.interviewId)"
+                  size="sm"
+                  variant="ghost"
+                  class="h-8"
+                >
+                  详情
+                </Button>
               </div>
             </div>
+            
+            <div v-if="interviewResults.length === 0" class="text-center py-6 text-muted-foreground">
+              暂无面试记录
+            </div>
           </div>
-          <SheetFooter>
-            <SheetClose as-child>
-            </SheetClose>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-    </CardFooter>
-  </form>
-  </Card>
-</div>
+        </div>
+      </div>
+    </main>
+  </div>
 </template>

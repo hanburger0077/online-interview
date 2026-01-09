@@ -162,6 +162,16 @@ watch(selectedInterviewee, () => {
   searchTerm.value = ''
 }, { deep: true })
 
+const toggleCandidate = (candidateName) => {
+  const index = selectedInterviewee.value.indexOf(candidateName)
+  if (index > -1) {
+    selectedInterviewee.value.splice(index, 1)
+  } else {
+    selectedInterviewee.value.push(candidateName)
+  }
+  setFieldValue('candidates', selectedInterviewee.value)
+}
+
 const onSubmit = handleSubmit((values) => {
   // 生成一个新的房间号（可以使用随机数或其他逻辑）
   const newRoomNumber = Math.random().toString(36).substring(2, 8)
@@ -184,157 +194,151 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-  <form @submit="onSubmit" class="h-screen overflow-hidden">
-    <div class="flex w-full h-full p-4 gap-4">
-      <Carousel class="w-[70%] scale-90">
-        <CarouselContent>
-          <CarouselItem v-for="interviewee in interviewees" :key="interviewee.id">
-            <div class="p-1 h-[100vh]">
-              <Card class="h-full">
-                <CardHeader>
-                  <CardTitle>{{ interviewee.name }}</CardTitle>
-                </CardHeader>
-                <CardContent class="flex flex-col items-center justify-center h-full p-4">
-                  <img class="w-24 h-24 rounded-full"
+  <div class="min-h-screen bg-background">
+    <Header />
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="mb-8">
+        <h1 class="text-3xl font-semibold tracking-tight">创建面试</h1>
+        <p class="text-muted-foreground mt-2">配置面试参数并选择面试者</p>
+      </div>
+      
+      <form @submit="onSubmit" class="space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- 面试者信息展示区域 -->
+          <div class="lg:col-span-2">
+            <h2 class="text-xl font-semibold mb-4">面试者信息</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div 
+                v-for="interviewee in interviewees" 
+                :key="interviewee.id"
+                class="border rounded-xl p-4 transition-all duration-300 hover:shadow-md"
+              >
+                <div class="flex items-center space-x-4">
+                  <img 
+                    class="w-12 h-12 rounded-full object-cover"
                     :src="`https://avatars.dicebear.com/api/avataaars/${interviewee.name}.svg`"
-                    :alt="interviewee.name" />
-                  <p class="text-lg">{{ interviewee.name }}</p>
-                  <p class="text-lg">{{ interviewee.profile }}</p>
-                  <p class="text-lg">笔试分数：{{ interviewee.score }}</p>
-                  <!-- 在这里添加更多简历内容 -->
-                </CardContent>
-              </Card>
+                    :alt="interviewee.name" 
+                  />
+                  <div>
+                    <h3 class="font-medium">{{ interviewee.name }}</h3>
+                    <p class="text-sm text-muted-foreground">{{ interviewee.profile }}</p>
+                    <p class="text-sm font-medium mt-1">笔试分数：{{ interviewee.score }}</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </CarouselItem>
-        </CarouselContent>
-        <CarouselPrevious>
-          <button type="button" class="carousel-control-prev" @click.prevent>
-            <Icon icon="radix-icons:chevron-left" />
-          </button>
-        </CarouselPrevious>
-        <CarouselNext>
-          <button type="button" class="carousel-control-next" @click.prevent>
-            <Icon icon="radix-icons:chevron-right" />
-          </button>
-        </CarouselNext>
-      </Carousel>
-      <Card class="flex flex-col max-h-screen w-[30%]">
-        <CardHeader>
-          <CardTitle>创建面试房间</CardTitle>
-        </CardHeader>
-        <CardContent class="space-y-6 flex-grow">
-          <!-- 面试类型 -->
-          <FormField name="interviewType">
-            <FormItem>
-              <FormLabel class="font-bold">面试类型</FormLabel>
-              <FormControl>
-                <Select v-model="selectedInterviewType">
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择面试类型" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="type in interviewTypes" :key="type.value" :value="type.value">
-                      <div>
-                        <div>{{ type.label }}</div>
+          </div>
+          
+          <!-- 配置表单区域 -->
+          <div class="lg:col-span-1">
+            <div class="bg-card rounded-xl border p-6">
+              <h2 class="text-xl font-semibold mb-6">面试配置</h2>
+              
+              <div class="space-y-6">
+                <!-- 面试类型 -->
+                <FormField name="interviewType">
+                  <FormItem>
+                    <FormLabel class="font-medium">面试类型</FormLabel>
+                    <FormControl>
+                      <Select v-model="selectedInterviewType">
+                        <SelectTrigger class="py-3">
+                          <SelectValue placeholder="选择面试类型" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem v-for="type in interviewTypes" :key="type.value" :value="type.value">
+                            {{ type.label }}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </FormField>
+                
+                <!-- 面试日期 -->
+                <FormField name="interviewDate">
+                  <FormItem>
+                    <FormLabel class="font-medium">面试日期</FormLabel>
+                    <FormControl>
+                      <Popover>
+                        <PopoverTrigger as-child>
+                          <Button variant="outline" class="w-full justify-start text-left font-normal py-3">
+                            <span>
+                              {{ value ? df.format(new Date(value.year, value.month - 1, value.day)) : '请选择面试日期' }}
+                            </span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent class="w-auto p-0">
+                          <Calendar 
+                            v-model:placeholder="placeholder" 
+                            v-model="value" 
+                            calendar-label="选择面试日期"
+                            @update:model-value="(v) => {
+                              if (v) {
+                                setFieldValue('interviewDate', v.toString())
+                              }
+                              else {
+                                setFieldValue('interviewDate', undefined)
+                              }
+                            }" 
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </FormField>
+                
+                <!-- 面试者选择 -->
+                <FormField name="candidates">
+                  <FormItem>
+                    <FormLabel class="font-medium">面试者</FormLabel>
+                    <FormControl>
+                      <div class="space-y-2 max-h-60 overflow-y-auto p-1">
+                        <div 
+                          v-for="interviewee in interviewees" 
+                          :key="interviewee.id"
+                          class="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent transition-colors duration-200 cursor-pointer"
+                          :class="{ 'bg-accent border-primary': selectedInterviewee.includes(interviewee.name) }"
+                          @click="toggleCandidate(interviewee.name)"
+                        >
+                          <div class="relative flex items-center justify-center">
+                            <input 
+                              type="checkbox" 
+                              :checked="selectedInterviewee.includes(interviewee.name)" 
+                              class="h-4 w-4 rounded-full border-input text-primary focus:ring-primary absolute opacity-0 peer"
+                              @change="toggleCandidate(interviewee.name)"
+                            >
+                            <div class="h-4 w-4 rounded-full border border-input peer-checked:bg-primary peer-checked:border-primary flex items-center justify-center">
+                              <svg v-if="selectedInterviewee.includes(interviewee.name)" class="h-3 w-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="flex items-center space-x-3">
+                            <img 
+                              class="w-8 h-8 rounded-full object-cover"
+                              :src="`https://avatars.dicebear.com/api/avataaars/${interviewee.name}.svg`"
+                              :alt="interviewee.name" 
+                            />
+                            <div>
+                              <span class="text-sm font-medium">{{ interviewee.name }}</span>
+                              <p class="text-xs text-muted-foreground">{{ interviewee.profile }}</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-          <!-- 面试日期 -->
-          <FormField name="interviewDate">
-            <FormItem>
-              <FormLabel>面试日期：</FormLabel>
-              <FormControl>
-                <Popover>
-                  <PopoverTrigger as-child>
-                    <Button variant="outline">
-                      <span>
-                        {{ value ? df.format(new Date(value.year, value.month - 1, value.day)) : '请选择面试日期' }}
-                      </span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent class="w-auto p-0">
-                    <Calendar v-model:placeholder="placeholder" v-model="value" calendar-label="选择面试日期"
-                      @update:model-value="(v) => {
-                        if (v) {
-                          setFieldValue('interviewDate', v.toString())
-                        }
-                        else {
-                          setFieldValue('interviewDate', undefined)
-                        }
-                      }" class="rounded-md border bg-background" />
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-          <!-- 面试者选择 -->
-          <FormField name="candidates">
-            <FormItem>
-              <FormLabel class="font-bold">面试者</FormLabel>
-              <FormControl>
-                <ComboboxRoot v-model="selectedInterviewee" v-model:search-term="searchTerm" multiple
-                  class="my-4 mx-auto relative bg-background">
-                  <ComboboxAnchor
-                    class="w-[400px] inline-flex items-center justify-between rounded-lg p-2 text-[13px] leading-none gap-[5px] bg-background text-grass11 shadow-[0_2px_10px] shadow-black/10 hover:bg-mauve3 focus:shadow-[0_0_0_2px] focus:shadow-black data-[placeholder]:text-grass9 outline-none">
-                    <TagsInputRoot v-slot="{ modelValue: tags }" :model-value="selectedInterviewee" delimiter=""
-                      class="flex gap-2 items-center rounded-lg flex-wrap">
-                      <TagsInputItem v-for="item in tags" :key="item.toString()" :value="item"
-                        class="flex items-center justify-center gap-2 text-black bg-gray-200 aria-[current=true]:bg-gray-300 rounded px-2 py-1">
-                        <TagsInputItemText class="text-sm">
-                          {{ item }}
-                        </TagsInputItemText>
-                        <TagsInputItemDelete>
-                          <Icon icon="lucide:x" />
-                        </TagsInputItemDelete>
-                      </TagsInputItem>
-
-                      <ComboboxInput as-child>
-                        <TagsInputInput placeholder="选择面试者"
-                          class="focus:outline-none flex-1 rounded !bg-transparent placeholder:text-mauve10 px-1"
-                          @keydown.enter.prevent />
-                      </ComboboxInput>
-                    </TagsInputRoot>
-
-                    <ComboboxTrigger>
-                      <Icon icon="radix-icons:chevron-down" class="h-4 w-4 text-grass11" />
-                    </ComboboxTrigger>
-                  </ComboboxAnchor>
-                  <ComboboxContent
-                    class="absolute z-10 w-full mt-2 bg-background overflow-hidden rounded shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade">
-                    <ComboboxViewport class="p-[5px]">
-                      <ComboboxEmpty class="text-gray-400 text-xs font-medium text-center py-2" />
-
-                      <ComboboxGroup>
-                        <ComboboxItem v-for="(interviewee, index) in interviewees" :key="index"
-                          class="text-[13px] leading-none text-grass11 rounded-[3px] flex items-center h-[25px] pr-[35px] pl-[25px] relative select-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:outline-none data-[highlighted]:bg-grass8 data-[highlighted]:text-grass1"
-                          :value="interviewee.name">
-                          <ComboboxItemIndicator
-                            class="absolute left-0 w-[25px] inline-flex items-center justify-center">
-                            <Icon icon="radix-icons:check" />
-                          </ComboboxItemIndicator>
-                          <span>
-                            {{ interviewee.name }}
-                          </span>
-                        </ComboboxItem>
-                      </ComboboxGroup>
-                    </ComboboxViewport>
-                  </ComboboxContent>
-                </ComboboxRoot>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-        </CardContent>
-        <CardFooter class="flex justify-between px-6 pb-6">
-          <Button type="submit" class="w-full">创建面试</Button>
-        </CardFooter>
-      </Card>
-    </div>
-  </form>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </FormField>
+              </div>
+              
+              <Button type="submit" class="w-full mt-8 py-4 rounded-full text-base">创建面试</Button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
 </template>

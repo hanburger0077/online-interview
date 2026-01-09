@@ -38,6 +38,15 @@ const fetchInterviewResult = async (interviewId: any) => {
     
     if (Array.isArray(result) && result.length > 0) {
       const interviewData = result[0];
+      // 根据实际返回数据确定录用状态
+      const hiringStatus = interviewData.result?.toLowerCase() || 'pending';
+      let hiringDecision = 'pending';
+      if (hiringStatus.includes('录') || hiringStatus.includes('accept')) {
+        hiringDecision = 'accepted';
+      } else if (hiringStatus.includes('拒') || hiringStatus.includes('reject') || hiringStatus.includes('不')) {
+        hiringDecision = 'rejected';
+      }
+      
       interviewResult.value = {
         jobTitle: interviewData.position,
         interviewDate: interviewData.updatedAt,
@@ -52,7 +61,7 @@ const fetchInterviewResult = async (interviewId: any) => {
         status: 'passed',
         rank: 3,
         comments: interviewData.comments,
-        hiringDecision: interviewData.result,
+        hiringDecision: hiringDecision,
         interviewee: interviewData.intervieweeId,
       }
     }
@@ -74,75 +83,109 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="app-container">
-    <!-- <Header /> -->
-    <div class="content-container">
-      <Card class="result-card">
-        <CardHeader>
-          <CardTitle class="text-2xl">面试结果公示</CardTitle>
-          <CardDescription>
-            应聘职位：{{ interviewResult.jobTitle }}
-            <br/>
-            面试日期：{{ interviewResult.interviewDate }}
-            <br/>
-            面试者：{{ interviewResult.interviewee }}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <!-- 状态展示 -->
-          <div class="status-section">
-            <Badge :variant="interviewResult.status === 'passed' ? 'default' : 'destructive'">
-              {{ interviewResult.status === 'passed' ? '面试通过' : '未通过' }}
-            </Badge>
-            <Badge variant="outline">
-              排名: {{ interviewResult.rank }}
-            </Badge>
-            <Badge :variant="interviewResult.hiringDecision === '录用' ? 'default' : 'destructive'">
-              {{ interviewResult.hiringDecision === '录用' ? '录用' : '未录用' }}
-            </Badge>
+  <div class="min-h-screen bg-background">
+    <Header />
+    
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="mb-8">
+        <h1 class="text-3xl font-semibold tracking-tight">面试结果</h1>
+        <p class="text-muted-foreground mt-2">查看详细的面试评估结果</p>
+      </div>
+      
+      <div class="bg-card rounded-xl border p-6 mb-8">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold">{{ interviewResult.jobTitle }}</h2>
+          <div class="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
+            <span>面试日期：{{ interviewResult.interviewDate }}</span>
+            <span>面试者：{{ interviewResult.interviewee }}</span>
           </div>
-
-          <!-- 分数详情 -->
-          <div class="scores-section">
-            <h3 class="text-lg font-semibold mb-4">详细得分</h3>
-            <div class="score-grid">
-              <div class="score-item">
-                <label>语言表达</label>
-                <div class="score">{{ interviewResult.scores.languageExpression }}/20</div>
-              </div>
-              <div class="score-item">
-                <label>逻辑思维</label>
-                <div class="score">{{ interviewResult.scores.logicalThinking }}/20</div>
-              </div>
-              <div class="score-item">
-                <label>情景应变</label>
-                <div class="score">{{ interviewResult.scores.situationalResponse }}/20</div>
-              </div>
-              <div class="score-item">
-                <label>专业知识</label>
-                <div class="score">{{ interviewResult.scores.professionalKnowledge }}/20</div>
-              </div>
-              <div class="score-item">
-                <label>个人素质</label>
-                <div class="score">{{ interviewResult.scores.personalQuality }}/20</div>
-              </div>
+        </div>
+        
+        <!-- 状态展示 -->
+        <div class="flex flex-wrap gap-3 mb-8">
+          <Badge :variant="interviewResult.status === 'passed' ? 'default' : 'destructive'" class="rounded-full">
+            {{ interviewResult.status === 'passed' ? '面试通过' : '未通过' }}
+          </Badge>
+          <Badge variant="outline" class="rounded-full">
+            排名: {{ interviewResult.rank }}
+          </Badge>
+          <Badge :variant="interviewResult.hiringDecision === 'accepted' ? 'default' : 'destructive'" class="rounded-full">
+            {{ interviewResult.hiringDecision === 'accepted' ? '录用' : '未录用' }}
+          </Badge>
+        </div>
+        
+        <!-- 总分圆环图 -->
+        <div class="flex justify-center mb-10">
+          <div class="relative w-48 h-48">
+            <svg class="w-full h-full" viewBox="0 0 100 100">
+              <!-- 背景圆环 -->
+              <circle 
+                cx="50" 
+                cy="50" 
+                r="45" 
+                fill="none" 
+                stroke="hsl(var(--muted))" 
+                stroke-width="8" 
+              />
+              <!-- 进度圆环 -->
+              <circle 
+                cx="50" 
+                cy="50" 
+                r="45" 
+                fill="none" 
+                stroke="hsl(var(--primary))" 
+                stroke-width="8" 
+                :stroke-dasharray="`${(interviewResult.scores.total / 100) * 283} 283`" 
+                stroke-dashoffset="0" 
+                transform="rotate(-90 50 50)" 
+                class="transition-all duration-1000 ease-out"
+              />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="text-3xl font-bold">{{ interviewResult.scores.total }}</span>
+              <span class="text-sm text-muted-foreground">总分</span>
             </div>
-            
-            <div class="total-score">
-              <label>总分</label>
-              <div class="score">{{ interviewResult.scores.total }}/100</div>
+          </div>
+        </div>
+        
+        <!-- 分数详情 -->
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold mb-6">详细得分</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="flex items-center justify-between p-4 rounded-lg border">
+              <span>语言表达</span>
+              <span class="font-medium">{{ interviewResult.scores.languageExpression }}/20</span>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg border">
+              <span>逻辑思维</span>
+              <span class="font-medium">{{ interviewResult.scores.logicalThinking }}/20</span>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg border">
+              <span>情景应变</span>
+              <span class="font-medium">{{ interviewResult.scores.situationalResponse }}/20</span>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg border">
+              <span>专业知识</span>
+              <span class="font-medium">{{ interviewResult.scores.professionalKnowledge }}/20</span>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg border">
+              <span>个人素质</span>
+              <span class="font-medium">{{ interviewResult.scores.personalQuality }}/20</span>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg bg-primary text-primary-foreground">
+              <span class="font-medium">总分</span>
+              <span class="font-bold">{{ interviewResult.scores.total }}/100</span>
             </div>
           </div>
-
-          <!-- 评语 -->
-          <div class="comments-section">
-            <h3 class="text-lg font-semibold mb-2">面试评语</h3>
-            <p class="text-gray-600">{{ interviewResult.comments }}</p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+        
+        <!-- 评语 -->
+        <div class="bg-muted/30 rounded-xl p-6">
+          <h3 class="text-xl font-semibold mb-4">面试评语</h3>
+          <p class="text-foreground leading-relaxed">{{ interviewResult.comments }}</p>
+        </div>
+      </div>
+    </main>
   </div>
 </template>
 

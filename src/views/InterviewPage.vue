@@ -298,140 +298,152 @@ const sendAnswer = async (answer: string) => {
 </script>
 
 <template>
-  <div class="flex w-full h-screen p-4 gap-4">
-    <ResizablePanelGroup
-      id="handle-demo-group-1"
-      direction="horizontal"
-      class="h-full w-full rounded-lg border"
-    >
-      <!-- Video Panel -->
-      <ResizablePanel id="handle-demo-panel-1" :default-size="50">
-          <Card class="flex w-full h-full flex-col border-2">
-            <CardHeader class="space-y-2 pb-4">
-              <div class="flex items-center justify-between">
-                <CardTitle class="text-2xl font-bold">视频面试</CardTitle>
-                <span class="rounded-full bg-muted px-3 py-1 text-sm">
-                  房间号：{{ usingroomnumber }}
-                </span>
-                <span class="rounded-full bg-muted px-3 py-1 text-sm">
-                  角色：{{ userRole }}
-                </span>
-              </div>
-            </CardHeader>
+<div class="min-h-screen bg-background">
+    <Header />
+    
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="mb-6">
+        <h1 class="text-3xl font-semibold tracking-tight">视频面试</h1>
+        <div class="flex items-center gap-4 mt-2">
+          <span class="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-medium">
+            <span class="mr-2 h-2 w-2 rounded-full bg-green-500"></span>
+            房间号：{{ usingroomnumber }}
+          </span>
+          <span class="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-medium">
+            <span class="mr-2 h-2 w-2 rounded-full bg-blue-500"></span>
+            角色：{{ userRole }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Video Panel -->
+        <div class="tech-gradient-teal rounded-xl border p-6">
+          <div class="mb-4">
+            <h2 class="text-xl font-semibold">视频通话</h2>
+          </div>
+          
+          <div class="relative aspect-video bg-muted rounded-lg overflow-hidden mb-6 border border-border">
+            <div v-show="isCameraOn" 
+                class="absolute inset-0 flex flex-col items-center justify-center p-4">
+              <video
+                v-show="isCameraOn && webrtcRole === 'sender'" 
+                id="local"
+                autoplay 
+                muted 
+                playsinline 
+                class="w-full h-full object-cover rounded-lg transition-opacity duration-200"
+              />
+              <p v-show="isCameraOn && webrtcRole === 'sender'" class="absolute top-2 left-0 w-full text-center text-sm text-muted-foreground bg-black/20 py-1 rounded-t-lg">
+                您正在分享摄像头画面
+              </p>
+              <video
+                v-show="isCameraOn && webrtcRole === 'receiver'" 
+                id="remote" 
+                autoplay 
+                muted 
+                playsinline 
+                class="w-full h-full object-cover rounded-lg transition-opacity duration-200"
+              />
+              <p v-show="isCameraOn && webrtcRole === 'receiver'" class="absolute top-2 left-0 w-full text-center text-sm text-muted-foreground bg-black/20 py-1 rounded-t-lg">
+                您正在接受对方的摄像头画面
+              </p>
+            </div>
+            <div v-show="!isCameraOn" 
+                class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+              <img :src="CameraIcon" alt="Camera Off" class="h-24 w-24 opacity-60 mb-4" />
+              <p class="text-sm text-muted-foreground">
+                摄像头未开启
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <Button 
+              @click="startInterview"
+              class="flex-1 rounded-full py-5 text-base font-medium glow-effect"
+              :disabled="isCameraOn"
+            >
+              <Mic class="mr-2 h-4 w-4" />
+              开始面试
+            </Button>
             
-            <CardContent class="flex flex-1 flex-col gap-6 p-6 h-full">
-              <div class="relative flex-1 overflow-hidden rounded-xl bg-slate-100">
-                <div v-show="isCameraOn" 
-                    class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <video
-                  v-show="isCameraOn && webrtcRole === 'sender'" 
-                  id="local"
-                  autoplay 
-                  muted 
-                  playsinline 
-                  class="w-full h-auto max-h-full object-cover rounded-xl transition-opacity duration-200"
-                />
-                <p v-show="isCameraOn && webrtcRole === 'sender'" class="absolute top-0 left-0 w-full text-center text-sm text-muted-foreground mt-2">
-                  您正在分享摄像头画面
-                </p>
-                <video
-                  v-show="isCameraOn && webrtcRole === 'receiver'" 
-                  id="remote" 
-                  autoplay 
-                  muted 
-                  playsinline 
-                  class="w-full h-auto max-h-full object-cover rounded-xl transition-opacity duration-200"
-                />
-                <p v-show="isCameraOn && webrtcRole === 'receiver'" class="absolute top-0 left-0 w-full text-center text-sm text-muted-foreground mt-2">
-                  您正在接受对方的摄像头画面
-                </p>
-                </div>
-                <div v-show="!isCameraOn" 
-                    class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                  <img :src="CameraIcon" alt="Camera Off" class="h-32 w-32 opacity-40" />
-                  <p class="mt-4 text-sm text-muted-foreground">
-                    摄像头未开启，请点击"开始面试"按钮
-                  </p>
-                </div>
-              </div>
+            <Button 
+              @click="stopInterview"
+              variant="destructive"
+              class="rounded-full py-5 text-base font-medium glow-effect"
+            >
+              结束面试
+            </Button>
+          </div>
+        </div>
 
-              <div class="flex gap-4">
-                <Button 
-                  @click="startInterview"
-                  class="flex-1 font-medium"
-                  size="lg"
-                  :disabled="isCameraOn"
+        <!-- Chat Panel -->
+        <div class="tech-gradient-purple rounded-xl border flex flex-col">
+          <div class="p-6 border-b">
+            <h2 class="text-xl font-semibold">对话记录</h2>
+          </div>
+          
+          <!-- 消息显示区域 -->
+          <div class="flex-1 overflow-y-auto p-4 space-y-4 max-h-[500px]">
+            <div 
+              v-for="(message, index) in messages" 
+              :key="index" 
+              :class="{
+                'flex justify-start': message.sender !== userRole && message.sender !== '系统消息',
+                'flex justify-end': message.sender === userRole && message.sender !== '系统消息',
+                'flex justify-center': message.sender === '系统消息'
+              }"
+            >
+              <div 
+                :class="{
+                  'max-w-[80%]': message.sender !== '系统消息',
+                  'w-fit': message.sender === '系统消息'
+                }"
+              >
+                <div 
+                  :class="{
+                    'text-xs text-muted-foreground mb-1': message.sender !== '系统消息',
+                    'text-center text-xs text-muted-foreground mb-1': message.sender === '系统消息'
+                  }"
                 >
-                  开始面试
-                </Button>
-                
-                <Button 
-                  @click="stopInterview"
-                  variant="destructive"
-                  class="flex-1 font-medium"
-                  size="lg"
+                  <span v-if="message.sender !== '系统消息'">
+                    {{ message.sender }} • {{ new Date(message.timestamp).toLocaleTimeString() }}
+                  </span>
+                  <span v-else>
+                    {{ new Date(message.timestamp).toLocaleString() }}
+                  </span>
+                </div>
+                <div 
+                  :class="{
+                    'inline-block rounded-2xl px-4 py-2 bg-primary text-primary-foreground': message.sender === userRole,
+                    'inline-block rounded-2xl px-4 py-2 bg-muted': message.sender !== userRole && message.sender !== '系统消息',
+                    'inline-block rounded-2xl px-4 py-2 bg-secondary text-secondary-foreground text-center': message.sender === '系统消息'
+                  }"
                 >
-                  结束面试
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-      </ResizablePanel>
-
-      <ResizableHandle id="handle-demo-handle-1" with-handle />
-
-      <!-- Chat Panel -->
-      <ResizablePanel id="handle-demo-panel-2" :default-size="50">
-          <Card class="flex w-full h-full flex-col border-2">
-            <CardHeader class="pb-4">
-              <CardTitle>对话记录</CardTitle>
-            </CardHeader>
-            <!-- 消息显示区域 -->
-            <div class="flex flex-col h-full">
-              <div class="space-y-4">
-                <CardContent class="flex flex-1 flex-col gap-4 h-full">
-                    <div class="flex-1 overflow-y-auto">
-                      <div class="space-y-4 px-2">
-                        <div v-for="(message, index) in messages" 
-                             :key="index" 
-                             class="flex flex-col space-y-1">
-                            <div :class="{
-                            'text-left': message.sender !== userRole && message.sender !== '系统消息',
-                            'text-right': message.sender === userRole && message.sender !== '系统消息',
-                            'text-center': message.sender === '系统消息'
-                          }">
-                          <div class="text-xs text-gray-500">
-                            {{ message.sender }} - {{ new Date(message.timestamp).toLocaleString() }}
-                          </div>
-                            <Badge :variant="getVariant(message.sender)">
-                              {{ message.text }}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
+                  {{ message.text }}
+                </div>
               </div>
             </div>
-            <!-- 消息输入区域 -->
-            <div class="p-4 border-t mt-auto">
-              <CardContent class="border-t pt-4">
-                    <form @submit.prevent="handleSubmit" class="flex flex-col gap-3">
-                      <Textarea
-                        v-model="newMessage"
-                        placeholder="输入消息，友好交流..."
-                        class="min-h-[100px] resize-none rounded-lg border-2 focus:border-primary"
-                     />
-                      <Button type="submit" class="w-full">
-                        发送消息
-                        <CornerDownLeft class="ml-2 h-4 w-4" />
-                      </Button> 
-                    </form>
-                  </CardContent>
-            </div>
-          </Card>
-      </ResizablePanel>
-    </ResizablePanelGroup>
+          </div>
+          
+          <!-- 消息输入区域 -->
+          <div class="p-4 border-t">
+            <form @submit.prevent="handleSubmit" class="flex flex-col gap-3">
+              <Textarea
+                v-model="newMessage"
+                placeholder="输入消息，友好交流..."
+                class="min-h-[100px] resize-none rounded-lg border bg-background"
+             />
+              <Button type="submit" class="w-full rounded-full py-5 glow-effect">
+                发送消息
+                <CornerDownLeft class="ml-2 h-4 w-4" />
+              </Button> 
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </template>
 

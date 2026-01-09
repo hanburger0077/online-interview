@@ -1,93 +1,81 @@
 <template>
-    <div style="height: 50px;   line-height: 50px;display: flex;background-color:rgb(245,255,250,0.5);;" >
-        <!-- <div style="width: 200px;padding-left: 30px;font-weight: bold;color: black;cursor: pointer;font-family:'Courier New', Courier, monospace;font-size:xx-large;" @click=" returntohome ">无象</div> -->
-        <div style="width: 200px; padding-left: 30px; font-weight: bold; color: black; cursor: pointer; font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif; font-size: 32px;" @click="returntohome">无象</div>
-        <div style="flex: 1;"> </div>
-        <div style="width: 100px;"> 
-
-          <el-dropdown>
-    <span class="el-dropdown-link">
-      {{ username }}<i eclass="el-icon-arrow-down el-icon--right"></i>
-    </span>
-    <el-dropdown-menu slot="dropdown" >
-      <el-dropdown-item @click.native="changeToUserData">个人资料</el-dropdown-item>
-      <el-dropdown-item @click.native="logout">登出</el-dropdown-item>
-    </el-dropdown-menu>
-  </el-dropdown>
-          <!-- <el-dropdown id="xiala" >
-    <span class="el-dropdown-link">{{ username }}</span>
-   
-      <el-dropdown-menu style="cursor: pointer;"  slot="dropdown">
-        <el-dropdown-item  @click="test">personal data</el-dropdown-item>
-        <el-dropdown-item>quit</el-dropdown-item>
-       
-      </el-dropdown-menu>
-    
-  </el-dropdown> -->
-</div>
-
+  <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+    <div class="container flex h-16 items-center justify-between px-4 md:px-6">
+      <div 
+        class="text-2xl font-semibold cursor-pointer transition-colors duration-300 hover:text-primary"
+        @click="returntohome"
+      >
+        面试系统
+      </div>
+      
+      <div v-if="username" class="flex items-center space-x-4">
+        <div class="relative">
+          <div class="flex items-center space-x-2 cursor-pointer">
+            <span class="text-sm font-medium">{{ username }}</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+          
+          <div class="absolute right-0 mt-2 w-48 bg-background rounded-md shadow-lg py-1 hidden group-hover:block z-50 border">
+            <button 
+              @click="changeToUserData" 
+              class="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors duration-200"
+            >
+              个人资料
+            </button>
+            <button 
+              @click="logout" 
+              class="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors duration-200"
+            >
+              登出
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+  </header>
 </template>
 
-<script>
-export default {
-    name:"Header",
-data(){
-return{
-username:"",
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-}
+const router = useRouter()
+const username = ref('')
 
-},
-
-methods:{
-
-  returntohome(){
-    const currentRoute = this.$route.path;
+const returntohome = () => {
+  const currentRoute = router.currentRoute.value.path
   if (currentRoute !== "/home") {
-    this.$router.push("home");
+    router.push("/home")
   }
-  },
-  changeToUserData(){
-    const currentRoute = this.$route.path; 
-  if (currentRoute !== "/userdata") {
-    this.$router.push("userdata");
-  }
-   
-  },
-  logout(){
-    const username = localStorage.getItem("username");
-  if (!username) {
-    this.$message.error("当前未登录");
-    const currentRoute = this.$route.path;
-  if (currentRoute !== "/login") {
-    this.$router.push("login");
-  }
-  } else {
-    localStorage.setItem("username", "");
-    this.$router.push("login")
-    location.reload();
-  }
-//     localStorage.setItem("username", "");
-//  this.$router.push("signin")
-//  location.reload();
-  },
-  test(){
-
-    alert("test")
-  },
-changetouserdata(){
-  this.$router.push('/userdata')
-},
-
-},
-
-mounted(){
-  this.username= localStorage.getItem('username');
-
-
-},
 }
+
+const changeToUserData = () => {
+  const currentRoute = router.currentRoute.value.path 
+  if (currentRoute !== "/userdata") {
+    router.push("/userdata")
+  }
+}
+
+const logout = () => {
+  const storedUsername = localStorage.getItem("username")
+  if (!storedUsername) {
+    alert("当前未登录")
+    const currentRoute = router.currentRoute.value.path
+    if (currentRoute !== "/login") {
+      router.push("/login")
+    }
+  } else {
+    localStorage.setItem("username", "")
+    router.push("/login")
+    location.reload()
+  }
+}
+
+onMounted(() => {
+  username.value = localStorage.getItem('username')
+})
 </script>
 
 <style>
